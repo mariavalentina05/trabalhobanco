@@ -26,7 +26,7 @@ class DashboardScreen extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: SizedBox(
-          height: 160, // altura reduzida do card
+          height: 160, 
           child: _buildBalanceCard(balance),
         ),
       ),
@@ -36,7 +36,7 @@ class DashboardScreen extends StatelessWidget {
   Widget _buildBalanceCard(double balance) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16), // padding também reduzido
+      padding: const EdgeInsets.all(16), 
       decoration: BoxDecoration(
         color: Colors.pink.shade50,
         borderRadius: BorderRadius.circular(16),

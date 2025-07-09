@@ -27,7 +27,20 @@ class WelcomeScreen extends StatelessWidget {
                   color: Colors.pink.shade400,
                 ),
               ),
+              const SizedBox(height: 24),
+
+              const Text(
+                'Controle seu dinheiro,\nconquiste sua liberdade',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.pink,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+
               const SizedBox(height: 40),
+
               SizedBox(
                 width: double.infinity,
                 height: 56,
@@ -48,7 +61,7 @@ class WelcomeScreen extends StatelessWidget {
                     ),
                   ),
                   child: const Text(
-                    'Começar',
+                    'Comece já!',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
