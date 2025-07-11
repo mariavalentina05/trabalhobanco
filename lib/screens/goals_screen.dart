@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'menu_screen.dart';
 
-
 class GoalsScreen extends StatefulWidget {
   const GoalsScreen({super.key});
 
@@ -13,12 +12,24 @@ class _GoalsScreenState extends State<GoalsScreen> {
   final TextEditingController _nomeController = TextEditingController();
   final TextEditingController _valorController = TextEditingController();
 
-  List<Map<String, dynamic>> metas = [
-    {'nome': 'Viagem', 'valor': 'R\$ 25.000,00'},
-    {'nome': 'Bike', 'valor': 'R\$ 4.500,00'},
-    {'nome': 'Almoço', 'valor': 'R\$ 250,00'},
-    {'nome': 'Jantar com chef', 'valor': 'R\$ 1.500,00'},
-  ];
+  List<Map<String, dynamic>> metas = []; 
+
+  void _salvarMeta() {
+    String nome = _nomeController.text.trim();
+    String valor = _valorController.text.trim();
+
+    if (nome.isNotEmpty && valor.isNotEmpty) {
+      setState(() {
+        metas.add({
+          'nome': nome,
+          'valor': 'R\$ $valor',
+          'concluida': false,
+        });
+        _nomeController.clear();
+        _valorController.clear();
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,10 +62,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
                   SizedBox(height: 8),
                   Text(
                     'Cadastre suas metas já',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                    ),
+                    style: TextStyle(color: Colors.white, fontSize: 16),
                   ),
                 ],
               ),
@@ -99,6 +107,27 @@ class _GoalsScreenState extends State<GoalsScreen> {
                       ),
                     ),
                   ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _salvarMeta,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFE91E63),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      child: const Text(
+                        'Salvar Meta',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -110,7 +139,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.grey.withOpacity(0.1),
+                      color: Colors.grey,
                       spreadRadius: 1,
                       blurRadius: 4,
                       offset: const Offset(0, 2),
@@ -162,6 +191,9 @@ class _GoalsScreenState extends State<GoalsScreen> {
                       child: ListView.builder(
                         itemCount: metas.length,
                         itemBuilder: (context, index) {
+                          final meta = metas[index];
+                          final bool concluida = meta['concluida'];
+
                           return Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 16,
@@ -180,7 +212,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
                                 Expanded(
                                   flex: 2,
                                   child: Text(
-                                    metas[index]['nome'],
+                                    meta['nome'],
                                     style: const TextStyle(
                                       fontSize: 14,
                                       color: Colors.black87,
@@ -189,7 +221,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
                                 ),
                                 Expanded(
                                   child: Text(
-                                    metas[index]['valor'],
+                                    meta['valor'],
                                     style: const TextStyle(
                                       fontSize: 14,
                                       color: Colors.black87,
@@ -197,20 +229,33 @@ class _GoalsScreenState extends State<GoalsScreen> {
                                     textAlign: TextAlign.center,
                                   ),
                                 ),
-                                Container(
-                                  width: 20,
-                                  height: 20,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: const Color(0xFFE91E63),
-                                      width: 2,
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      metas[index]['concluida'] =
+                                          !metas[index]['concluida'];
+                                    });
+                                  },
+                                  child: Container(
+                                    width: 24,
+                                    height: 24,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: concluida
+                                          ? const Color(0xFFE91E63)
+                                          : Colors.transparent,
+                                      border: Border.all(
+                                        color: const Color(0xFFE91E63),
+                                        width: 2,
+                                      ),
                                     ),
-                                  ),
-                                  child: const Icon(
-                                    Icons.check,
-                                    size: 12,
-                                    color: Color(0xFFE91E63),
+                                    child: Icon(
+                                      Icons.check,
+                                      size: 14,
+                                      color: concluida
+                                          ? Colors.white
+                                          : const Color(0xFFE91E63),
+                                    ),
                                   ),
                                 ),
                               ],
@@ -233,18 +278,9 @@ class _GoalsScreenState extends State<GoalsScreen> {
         unselectedItemColor: Colors.grey,
         currentIndex: 2,
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.list),
-            label: 'Registros',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.flag),
-            label: 'Metas',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.list), label: 'Registros'),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.flag), label: 'Metas'),
         ],
         onTap: (index) {
           switch (index) {
@@ -255,7 +291,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
               );
               break;
             case 1:
-              Navigator.pop(context); 
+              Navigator.pop(context);
               break;
             case 2:
               break;
