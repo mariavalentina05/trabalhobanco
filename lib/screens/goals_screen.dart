@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'menu_screen.dart';
+import 'dashboard_screen.dart';
+import 'package:flutter/services.dart';
 
 class GoalsScreen extends StatefulWidget {
   const GoalsScreen({super.key});
@@ -12,7 +14,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
   final TextEditingController _nomeController = TextEditingController();
   final TextEditingController _valorController = TextEditingController();
 
-  List<Map<String, dynamic>> metas = []; 
+  List<Map<String, dynamic>> metas = [];
 
   void _salvarMeta() {
     String nome = _nomeController.text.trim();
@@ -20,11 +22,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
 
     if (nome.isNotEmpty && valor.isNotEmpty) {
       setState(() {
-        metas.add({
-          'nome': nome,
-          'valor': 'R\$ $valor',
-          'concluida': false,
-        });
+        metas.add({'nome': nome, 'valor': 'R\$ $valor', 'concluida': false});
         _nomeController.clear();
         _valorController.clear();
       });
@@ -92,6 +90,9 @@ class _GoalsScreenState extends State<GoalsScreen> {
                   TextField(
                     controller: _valorController,
                     keyboardType: TextInputType.number,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                    ], // <-- ESSA LINHA ADICIONADA
                     decoration: InputDecoration(
                       hintText: 'R\$ Valor...',
                       hintStyle: TextStyle(color: Colors.grey[400]),
@@ -107,6 +108,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
                       ),
                     ),
                   ),
+
                   const SizedBox(height: 12),
                   SizedBox(
                     width: double.infinity,
@@ -121,10 +123,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
                       ),
                       child: const Text(
                         'Salvar Meta',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.white,
-                        ),
+                        style: TextStyle(fontSize: 16, color: Colors.white),
                       ),
                     ),
                   ),
@@ -234,16 +233,23 @@ class _GoalsScreenState extends State<GoalsScreen> {
                                     setState(() {
                                       metas[index]['concluida'] =
                                           !metas[index]['concluida'];
+
+                                      final metaAtualizada = metas.removeAt(
+                                        index,
+                                      );
+                                      metas.add(metaAtualizada);
                                     });
                                   },
+
                                   child: Container(
                                     width: 24,
                                     height: 24,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
-                                      color: concluida
-                                          ? const Color(0xFFE91E63)
-                                          : Colors.transparent,
+                                      color:
+                                          concluida
+                                              ? const Color(0xFFE91E63)
+                                              : Colors.transparent,
                                       border: Border.all(
                                         color: const Color(0xFFE91E63),
                                         width: 2,
@@ -252,9 +258,10 @@ class _GoalsScreenState extends State<GoalsScreen> {
                                     child: Icon(
                                       Icons.check,
                                       size: 14,
-                                      color: concluida
-                                          ? Colors.white
-                                          : const Color(0xFFE91E63),
+                                      color:
+                                          concluida
+                                              ? Colors.white
+                                              : const Color(0xFFE91E63),
                                     ),
                                   ),
                                 ),
@@ -283,18 +290,16 @@ class _GoalsScreenState extends State<GoalsScreen> {
           BottomNavigationBarItem(icon: Icon(Icons.flag), label: 'Metas'),
         ],
         onTap: (index) {
-          switch (index) {
-            case 0:
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const MenuScreen()),
-              );
-              break;
-            case 1:
-              Navigator.pop(context);
-              break;
-            case 2:
-              break;
+          if (index == 0) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const MenuScreen()),
+            );
+          } else if (index == 1) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const DashboardScreen()),
+            );
           }
         },
       ),
