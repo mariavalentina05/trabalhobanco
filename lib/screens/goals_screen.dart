@@ -27,6 +27,12 @@ class _GoalsScreenState extends State<GoalsScreen> {
 
   Future<void> _loadGoals() async {
     final allGoals = await _goalDao.getAllGoals();
+
+    allGoals.sort((a, b) {
+      if (a.isCompleted == b.isCompleted) return 0;
+      return a.isCompleted ? 1 : -1;
+    });
+
     setState(() {
       goals = allGoals;
     });
@@ -67,6 +73,11 @@ class _GoalsScreenState extends State<GoalsScreen> {
     _loadGoals();
   }
 
+  Future<void> _excluirMeta(int id) async {
+    await _goalDao.deleteGoal(id);
+    _loadGoals();
+  }
+
   @override
   void dispose() {
     _nomeController.dispose();
@@ -79,7 +90,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
       type: BottomNavigationBarType.fixed,
       selectedItemColor: Colors.pink,
       unselectedItemColor: Colors.grey,
-      currentIndex: 2, 
+      currentIndex: 2,
       items: const [
         BottomNavigationBarItem(
           icon: Icon(Icons.list),
@@ -220,61 +231,74 @@ class _GoalsScreenState extends State<GoalsScreen> {
                 itemCount: goals.length,
                 itemBuilder: (context, index) {
                   final goal = goals[index];
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[50],
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey.shade200),
+                  return Dismissible(
+                    key: Key(goal.id.toString()),
+                    direction: DismissDirection.endToStart,
+                    background: Container(
+                      alignment: Alignment.centerRight,
+                      padding: const EdgeInsets.only(right: 20),
+                      color: Colors.red,
+                      child: const Icon(Icons.delete, color: Colors.white),
                     ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          flex: 2,
-                          child: Text(
-                            goal.title,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: Text(
-                            'R\$ ${goal.targetAmount.toStringAsFixed(2)}',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: Colors.black87,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () => _alternarConclusao(goal),
-                          child: Container(
-                            width: 24,
-                            height: 24,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: goal.isCompleted
-                                  ? const Color(0xFFE91E63)
-                                  : Colors.transparent,
-                              border: Border.all(
-                                color: const Color(0xFFE91E63),
-                                width: 2,
+                    onDismissed: (direction) {
+                      _excluirMeta(goal.id!);
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[50],
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.grey.shade200),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            flex: 2,
+                            child: Text(
+                              goal.title,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
-                            child: Icon(
-                              Icons.check,
-                              size: 14,
-                              color: goal.isCompleted
-                                  ? Colors.white
-                                  : const Color(0xFFE91E63),
+                          ),
+                          Expanded(
+                            child: Text(
+                              'R\$ ${goal.targetAmount.toStringAsFixed(2)}',
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Colors.black87,
+                              ),
+                              textAlign: TextAlign.center,
                             ),
                           ),
-                        ),
-                      ],
+                          GestureDetector(
+                            onTap: () => _alternarConclusao(goal),
+                            child: Container(
+                              width: 24,
+                              height: 24,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: goal.isCompleted
+                                    ? const Color(0xFFE91E63)
+                                    : Colors.transparent,
+                                border: Border.all(
+                                  color: const Color(0xFFE91E63),
+                                  width: 2,
+                                ),
+                              ),
+                              child: Icon(
+                                Icons.check,
+                                size: 14,
+                                color: goal.isCompleted
+                                    ? Colors.white
+                                    : const Color(0xFFE91E63),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 },
