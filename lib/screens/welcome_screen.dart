@@ -8,12 +8,13 @@ class WelcomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Center(
+      body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(24.0),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              const Spacer(),
               Container(
                 width: 120,
                 height: 120,
@@ -27,20 +28,18 @@ class WelcomeScreen extends StatelessWidget {
                   color: Colors.pink.shade400,
                 ),
               ),
-              const SizedBox(height: 24),
-
+              const SizedBox(height: 40),
               const Text(
-                'Controle seu dinheiro,\nconquiste sua liberdade',
+                'Controle seu\ndinheiro,\nconquiste sua\nliberdade',
                 textAlign: TextAlign.center,
                 style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
                   color: Colors.pink,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
+                  height: 1.2,
                 ),
               ),
-
-              const SizedBox(height: 40),
-
+              const Spacer(),
               SizedBox(
                 width: double.infinity,
                 height: 56,
@@ -49,7 +48,7 @@ class WelcomeScreen extends StatelessWidget {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => const DashboardScreen(),
+                        builder: (context) => const DashboardScreen(),
                       ),
                     );
                   },
@@ -69,6 +68,7 @@ class WelcomeScreen extends StatelessWidget {
                   ),
                 ),
               ),
+              const SizedBox(height: 40),
             ],
           ),
         ),

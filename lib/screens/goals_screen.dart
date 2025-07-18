@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import '../models/goal.dart';
+import '../dao/goal_dao.dart';
 import 'menu_screen.dart';
 import 'dashboard_screen.dart';
-import 'package:flutter/services.dart';
 
 class GoalsScreen extends StatefulWidget {
   const GoalsScreen({super.key});
@@ -13,26 +15,111 @@ class GoalsScreen extends StatefulWidget {
 class _GoalsScreenState extends State<GoalsScreen> {
   final TextEditingController _nomeController = TextEditingController();
   final TextEditingController _valorController = TextEditingController();
+  final GoalDao _goalDao = GoalDao();
 
-  List<Map<String, dynamic>> metas = [];
+  List<Goal> goals = [];
 
-  void _salvarMeta() {
+  @override
+  void initState() {
+    super.initState();
+    _loadGoals();
+  }
+
+  Future<void> _loadGoals() async {
+    final allGoals = await _goalDao.getAllGoals();
+    setState(() {
+      goals = allGoals;
+    });
+  }
+
+  Future<void> _salvarMeta() async {
     String nome = _nomeController.text.trim();
-    String valor = _valorController.text.trim();
+    String valorTexto = _valorController.text.trim();
 
-    if (nome.isNotEmpty && valor.isNotEmpty) {
-      setState(() {
-        metas.add({'nome': nome, 'valor': 'R\$ $valor', 'concluida': false});
-        _nomeController.clear();
-        _valorController.clear();
-      });
+    if (nome.isNotEmpty && valorTexto.isNotEmpty) {
+      double valor = double.tryParse(valorTexto) ?? 0.0;
+
+      final novaMeta = Goal(
+        title: nome,
+        targetAmount: valor,
+        currentAmount: 0.0,
+        deadline: DateTime.now().add(const Duration(days: 365)),
+      );
+
+      await _goalDao.insertGoal(novaMeta);
+      _nomeController.clear();
+      _valorController.clear();
+      _loadGoals();
     }
+  }
+
+  Future<void> _alternarConclusao(Goal goal) async {
+    final atualizado = Goal(
+      id: goal.id,
+      title: goal.title,
+      targetAmount: goal.targetAmount,
+      currentAmount: goal.currentAmount,
+      deadline: goal.deadline,
+      isCompleted: !goal.isCompleted,
+    );
+
+    await _goalDao.updateGoal(atualizado);
+    _loadGoals();
+  }
+
+  @override
+  void dispose() {
+    _nomeController.dispose();
+    _valorController.dispose();
+    super.dispose();
+  }
+
+  Widget _buildBottomNavBar() {
+    return BottomNavigationBar(
+      type: BottomNavigationBarType.fixed,
+      selectedItemColor: Colors.pink,
+      unselectedItemColor: Colors.grey,
+      currentIndex: 2, 
+      items: const [
+        BottomNavigationBarItem(
+          icon: Icon(Icons.list),
+          label: 'Registros',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.home),
+          label: 'Home',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.flag),
+          label: 'Metas',
+        ),
+      ],
+      onTap: (index) {
+        switch (index) {
+          case 0:
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const MenuScreen()),
+            );
+            break;
+          case 1:
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const DashboardScreen()),
+            );
+            break;
+          case 2:
+            break;
+        }
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      bottomNavigationBar: _buildBottomNavBar(),
       body: SafeArea(
         child: Column(
           children: [
@@ -90,9 +177,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
                   TextField(
                     controller: _valorController,
                     keyboardType: TextInputType.number,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                    ], // <-- ESSA LINHA ADICIONADA
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     decoration: InputDecoration(
                       hintText: 'R\$ Valor...',
                       hintStyle: TextStyle(color: Colors.grey[400]),
@@ -108,7 +193,6 @@ class _GoalsScreenState extends State<GoalsScreen> {
                       ),
                     ),
                   ),
-
                   const SizedBox(height: 12),
                   SizedBox(
                     width: double.infinity,
@@ -131,185 +215,75 @@ class _GoalsScreenState extends State<GoalsScreen> {
               ),
             ),
             Expanded(
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey,
-                      spreadRadius: 1,
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
+              child: ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                itemCount: goals.length,
+                itemBuilder: (context, index) {
+                  final goal = goals[index];
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[50],
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.grey.shade200),
                     ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFE91E63),
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(12),
-                          topRight: Radius.circular(12),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: Text(
+                            goal.title,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
                         ),
-                      ),
-                      child: const Row(
-                        children: [
-                          Expanded(
-                            flex: 2,
-                            child: Text(
-                              'Metas',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
+                        Expanded(
+                          child: Text(
+                            'R\$ ${goal.targetAmount.toStringAsFixed(2)}',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Colors.black87,
                             ),
+                            textAlign: TextAlign.center,
                           ),
-                          Expanded(
-                            child: Text(
-                              'Valor',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: metas.length,
-                        itemBuilder: (context, index) {
-                          final meta = metas[index];
-                          final bool concluida = meta['concluida'];
-
-                          return Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 12,
-                            ),
+                        ),
+                        GestureDetector(
+                          onTap: () => _alternarConclusao(goal),
+                          child: Container(
+                            width: 24,
+                            height: 24,
                             decoration: BoxDecoration(
-                              border: Border(
-                                bottom: BorderSide(
-                                  color: Colors.grey[200]!,
-                                  width: 1,
-                                ),
+                              shape: BoxShape.circle,
+                              color: goal.isCompleted
+                                  ? const Color(0xFFE91E63)
+                                  : Colors.transparent,
+                              border: Border.all(
+                                color: const Color(0xFFE91E63),
+                                width: 2,
                               ),
                             ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  flex: 2,
-                                  child: Text(
-                                    meta['nome'],
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.black87,
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Text(
-                                    meta['valor'],
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.black87,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                                GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      metas[index]['concluida'] =
-                                          !metas[index]['concluida'];
-
-                                      final metaAtualizada = metas.removeAt(
-                                        index,
-                                      );
-                                      metas.add(metaAtualizada);
-                                    });
-                                  },
-
-                                  child: Container(
-                                    width: 24,
-                                    height: 24,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color:
-                                          concluida
-                                              ? const Color(0xFFE91E63)
-                                              : Colors.transparent,
-                                      border: Border.all(
-                                        color: const Color(0xFFE91E63),
-                                        width: 2,
-                                      ),
-                                    ),
-                                    child: Icon(
-                                      Icons.check,
-                                      size: 14,
-                                      color:
-                                          concluida
-                                              ? Colors.white
-                                              : const Color(0xFFE91E63),
-                                    ),
-                                  ),
-                                ),
-                              ],
+                            child: Icon(
+                              Icons.check,
+                              size: 14,
+                              color: goal.isCompleted
+                                  ? Colors.white
+                                  : const Color(0xFFE91E63),
                             ),
-                          );
-                        },
-                      ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  );
+                },
               ),
             ),
             const SizedBox(height: 20),
           ],
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: Colors.pink,
-        unselectedItemColor: Colors.grey,
-        currentIndex: 2,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.list), label: 'Registros'),
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.flag), label: 'Metas'),
-        ],
-        onTap: (index) {
-          if (index == 0) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const MenuScreen()),
-            );
-          } else if (index == 1) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const DashboardScreen()),
-            );
-          }
-        },
-      ),
     );
-  }
-
-  @override
-  void dispose() {
-    _nomeController.dispose();
-    _valorController.dispose();
-    super.dispose();
   }
 }

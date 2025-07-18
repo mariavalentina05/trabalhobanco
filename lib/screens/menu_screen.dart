@@ -73,7 +73,7 @@ class MenuScreen extends StatelessWidget {
                   elevation: 0,
                 ),
                 child: const Text(
-                  'Recebimentos',
+                  'Registrar Recebimentos',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -103,7 +103,7 @@ class MenuScreen extends StatelessWidget {
                   elevation: 0,
                 ),
                 child: const Text(
-                  'Gastos',
+                  'Registrar Gastos',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -123,7 +123,7 @@ class MenuScreen extends StatelessWidget {
       type: BottomNavigationBarType.fixed,
       selectedItemColor: Colors.pink,
       unselectedItemColor: Colors.grey,
-      currentIndex: 0,
+      currentIndex: 0, 
       backgroundColor: Colors.white,
       elevation: 0,
       items: const [
@@ -142,15 +142,15 @@ class MenuScreen extends StatelessWidget {
       ],
       onTap: (index) {
         switch (index) {
-          case 0: 
+          case 0:
             break;
-          case 1: 
+          case 1:
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (context) => const DashboardScreen()),
             );
             break;
-          case 2: 
+          case 2:
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const GoalsScreen()),
