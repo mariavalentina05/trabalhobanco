@@ -16,17 +16,17 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   final _descriptionController = TextEditingController();
   final _amountController = TextEditingController();
   final TransactionDao _transactionDao = TransactionDao();
-  
+
   String _selectedCategory = '';
   List<Transaction> _transactions = [];
-  
+
   final List<String> _incomeCategories = [
     'Salário',
     'Freelance',
     'Investimentos',
     'Outros',
   ];
-  
+
   final List<String> _expenseCategories = [
     'Alimentação',
     'Transporte',
@@ -40,7 +40,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   @override
   void initState() {
     super.initState();
-    final categories = widget.type == 'income' ? _incomeCategories : _expenseCategories;
+    final categories =
+        widget.type == 'income' ? _incomeCategories : _expenseCategories;
     _selectedCategory = categories.first;
     _loadTransactions();
   }
@@ -48,7 +49,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   Future<void> _loadTransactions() async {
     final allTransactions = await _transactionDao.getAllTransactions();
     setState(() {
-      _transactions = allTransactions.where((t) => t.type == widget.type).toList();
+      _transactions =
+          allTransactions.where((t) => t.type == widget.type).toList();
     });
   }
 
@@ -75,11 +77,13 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               key: _formKey,
               child: Column(
                 children: [
-                  _buildTextField('Nome', _descriptionController, 'Digite o nome'),
+                  _buildTextField(
+                      'Nome', _descriptionController, 'Digite o nome'),
                   const SizedBox(height: 12),
-                  _buildTextField('R\$ Valor', _amountController, 'R\$ 0,00', isNumber: true),
+                  _buildTextField('R\$ Valor', _amountController, 'R\$ 0,00',
+                      isNumber: true),
                   const SizedBox(height: 12),
-                  _buildDropdownField('Data', categories),
+                  _buildDropdownField('Fonte', categories),
                   const SizedBox(height: 20),
                   SizedBox(
                     width: double.infinity,
@@ -113,7 +117,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 children: [
                   Container(
                     color: Colors.pink,
-                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 12, horizontal: 16),
                     child: const Row(
                       children: [
                         Expanded(
@@ -183,15 +188,17 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                                   ),
                                 ),
                                 onDismissed: (direction) async {
-                                  await _transactionDao.deleteTransaction(transaction.id!);
+                                  await _transactionDao
+                                      .deleteTransaction(transaction.id!);
                                   setState(() {
                                     _transactions.removeAt(index);
                                   });
-                                  
+
                                   if (mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
-                                        content: Text('Registro excluído com sucesso!'),
+                                        content: Text(
+                                            'Registro excluído com sucesso!'),
                                         backgroundColor: Colors.red,
                                       ),
                                     );
@@ -199,7 +206,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                                 },
                                 child: Container(
                                   color: Colors.white,
-                                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 12, horizontal: 16),
                                   child: Row(
                                     children: [
                                       Expanded(
@@ -219,7 +227,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                                           style: TextStyle(
                                             fontSize: 14,
                                             fontWeight: FontWeight.w500,
-                                            color: isIncome ? Colors.green : Colors.red,
+                                            color: isIncome
+                                                ? Colors.green
+                                                : Colors.red,
                                           ),
                                           textAlign: TextAlign.center,
                                         ),
@@ -251,7 +261,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     );
   }
 
-  Widget _buildTextField(String label, TextEditingController controller, String hint, {bool isNumber = false}) {
+  Widget _buildTextField(
+      String label, TextEditingController controller, String hint,
+      {bool isNumber = false}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -278,13 +290,15 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               borderRadius: BorderRadius.circular(8),
               borderSide: const BorderSide(color: Colors.pink),
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
           ),
           validator: (value) {
             if (value == null || value.isEmpty) {
               return 'Campo obrigatório';
             }
-            if (isNumber && double.tryParse(value.replaceAll(',', '.')) == null) {
+            if (isNumber &&
+                double.tryParse(value.replaceAll(',', '.')) == null) {
               return 'Valor inválido';
             }
             return null;
@@ -318,7 +332,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               borderRadius: BorderRadius.circular(8),
               borderSide: const BorderSide(color: Colors.pink),
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
           ),
           items: categories.map((category) {
             return DropdownMenuItem(
@@ -338,8 +353,18 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
   String _getMonthName(int month) {
     const months = [
-      'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
-      'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
+      'Jan',
+      'Fev',
+      'Mar',
+      'Abr',
+      'Mai',
+      'Jun',
+      'Jul',
+      'Ago',
+      'Set',
+      'Out',
+      'Nov',
+      'Dez'
     ];
     return months[month - 1];
   }
@@ -347,7 +372,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   Future<void> _saveTransaction() async {
     if (_formKey.currentState!.validate()) {
       final amount = double.parse(_amountController.text.replaceAll(',', '.'));
-      
+
       final transaction = Transaction(
         description: _descriptionController.text,
         amount: amount,
@@ -357,7 +382,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       );
 
       await _transactionDao.insertTransaction(transaction);
-      
+
       _descriptionController.clear();
       _amountController.clear();
 
@@ -366,7 +391,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${widget.type == 'income' ? 'Recebimento' : 'Gasto'} registrado com sucesso!'),
+            content: Text(
+                '${widget.type == 'income' ? 'Recebimento' : 'Gasto'} registrado com sucesso!'),
             backgroundColor: Colors.green,
           ),
         );
