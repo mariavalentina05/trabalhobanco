@@ -16,7 +16,7 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   final TransactionDao _transactionDao = TransactionDao();
   final GoalDao _goalDao = GoalDao();
-  
+
   double totalIncome = 0.0;
   double totalExpenses = 0.0;
   Map<String, double> expensesByCategory = {};
@@ -80,156 +80,162 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildBalanceCard(double balance) {
-  return Container(
-    width: double.infinity,
-    padding: const EdgeInsets.all(24),
-    decoration: BoxDecoration(
-      color: Colors.pink.shade50,
-      borderRadius: BorderRadius.circular(16),
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        const Text(
-          'Saldo atual',
-          style: TextStyle(
-            color: Colors.black54,
-            fontSize: 16,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          '${balance.toStringAsFixed(2)}',
-          style: const TextStyle(
-            color: Colors.black,
-            fontSize: 32,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const Text(
-                    'Recebidos',
-                    style: TextStyle(color: Colors.pink, fontSize: 14, fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${totalIncome.toStringAsFixed(2)}',
-                    style: const TextStyle(
-                      color: Colors.pink,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.pink.shade50,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const Text(
+            'Saldo atual',
+            style: TextStyle(
+              color: Colors.black54,
+              fontSize: 16,
             ),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const Text(
-                    'Gastos',
-                    style: TextStyle(color: Colors.grey, fontSize: 14, fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${totalExpenses.toStringAsFixed(2)}',
-                    style: const TextStyle(
-                      color: Colors.grey,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '${balance.toStringAsFixed(2)}',
+            style: const TextStyle(
+              color: Colors.black,
+              fontSize: 32,
+              fontWeight: FontWeight.bold,
             ),
-          ],
-        ),
-      ],
-    ),
-  );
-}
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const Text(
+                      'Recebidos',
+                      style: TextStyle(
+                          color: Colors.pink,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${totalIncome.toStringAsFixed(2)}',
+                      style: const TextStyle(
+                        color: Colors.pink,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const Text(
+                      'Gastos',
+                      style: TextStyle(
+                          color: Colors.grey,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${totalExpenses.toStringAsFixed(2)}',
+                      style: const TextStyle(
+                        color: Colors.grey,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildChartsCarousel() {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      const Text(
-        'Análises',
-        style: TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      const SizedBox(height: 16),
-      SizedBox(
-        height: 300,
-        child: PageView(
-          controller: PageController(viewportFraction: 0.9),
-          children: [
-            _buildExpensesChart(),
-            _buildIncomeVsExpensesChart(),
-            _buildGoalsChart(),
-          ],
-        ),
-      ),
-    ],
-  );
-}
-
-
-  Widget _buildExpensesChart() {
-  return Container(
-    padding: const EdgeInsets.all(16),
-    decoration: BoxDecoration(
-      color: Colors.pink.shade50,
-      borderRadius: BorderRadius.circular(16),
-    ),
-    child: Column(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Tabela de gastos',
+          'Análises',
           style: TextStyle(
-            fontSize: 16,
+            fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Colors.black,
           ),
         ),
         const SizedBox(height: 16),
-        Expanded(
-          child: expensesByCategory.isEmpty
-              ? const Center(child: Text('Nenhum gasto registrado'))
-              : PieChart(
-                  PieChartData(
-                    sections: expensesByCategory.entries.map((entry) {
-                      final colors = [
-                        Colors.pink.shade300,
-                        Colors.pink.shade400,
-                        Colors.pink.shade500,
-                        Colors.pink.shade200,
-                        Colors.pink.shade600,
-                      ];
-                      final index = expensesByCategory.keys.toList().indexOf(entry.key);
-                      return PieChartSectionData(
-                        value: entry.value,
-                        title: '',
-                        color: colors[index % colors.length],
-                        radius: 80,
-                      );
-                    }).toList(),
-                  ),
-                ),
+        SizedBox(
+          height: 300,
+          child: PageView(
+            controller: PageController(viewportFraction: 0.9),
+            children: [
+              _buildExpensesChart(),
+              _buildIncomeVsExpensesChart(),
+              _buildGoalsChart(),
+            ],
+          ),
         ),
       ],
-    ),
-  );
-}
+    );
+  }
+
+  Widget _buildExpensesChart() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.pink.shade50,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        children: [
+          const Text(
+            'Tabela de gastos',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Expanded(
+            child: expensesByCategory.isEmpty
+                ? const Center(child: Text('Nenhum gasto registrado'))
+                : PieChart(
+                    PieChartData(
+                      sections: expensesByCategory.entries.map((entry) {
+                        final colors = [
+                          Colors.pink.shade300,
+                          Colors.pink.shade400,
+                          Colors.pink.shade500,
+                          Colors.pink.shade200,
+                          Colors.pink.shade600,
+                        ];
+                        final index =
+                            expensesByCategory.keys.toList().indexOf(entry.key);
+                        return PieChartSectionData(
+                          value: entry.value,
+                          title: '',
+                          color: colors[index % colors.length],
+                          radius: 80,
+                        );
+                      }).toList(),
+                    ),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildIncomeVsExpensesChart() {
     return Container(
@@ -318,7 +324,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           children: [
                             Text(
                               goal.title,
-                              style: const TextStyle(fontWeight: FontWeight.w600),
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w600),
                             ),
                             const SizedBox(height: 4),
                             LinearProgressIndicator(
@@ -348,46 +355,44 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildQuickActions() {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          _buildActionButton(
-            Icons.arrow_back,
-            () {
-            },
-          ),
-          _buildActionButton(
-            Icons.arrow_forward,
-            () {
-            },
-          ),
-        ],
-      ),
-    ],
-  );
-}
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            _buildActionButton(
+              Icons.arrow_back,
+              () {},
+            ),
+            _buildActionButton(
+              Icons.arrow_forward,
+              () {},
+            ),
+          ],
+        ),
+      ],
+    );
+  }
 
-Widget _buildActionButton(IconData icon, VoidCallback onTap) {
-  return GestureDetector(
-    onTap: onTap,
-    child: Container(
-      width: 50,
-      height: 50,
-      decoration: BoxDecoration(
-        color: Colors.pink,
-        borderRadius: BorderRadius.circular(25),
+  Widget _buildActionButton(IconData icon, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 50,
+        height: 50,
+        decoration: BoxDecoration(
+          color: Colors.pink,
+          borderRadius: BorderRadius.circular(25),
+        ),
+        child: Icon(
+          icon,
+          color: Colors.white,
+          size: 24,
+        ),
       ),
-      child: Icon(
-        icon,
-        color: Colors.white,
-        size: 24,
-      ),
-    ),
-  );
-}
+    );
+  }
 
   Widget _buildBottomNavBar() {
     return BottomNavigationBar(
@@ -419,7 +424,7 @@ Widget _buildActionButton(IconData icon, VoidCallback onTap) {
             break;
           case 1:
             break;
-          case 2: 
+          case 2:
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const GoalsScreen()),
