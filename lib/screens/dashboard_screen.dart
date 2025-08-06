@@ -3,8 +3,10 @@ import 'package:fl_chart/fl_chart.dart';
 import '/dao/transaction_dao.dart';
 import '/dao/goal_dao.dart';
 import '/models/goal.dart';
+import '/models/transaction.dart';
 import 'menu_screen.dart';
 import 'goals_screen.dart';
+import 'transactions_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -21,6 +23,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   double totalExpenses = 0.0;
   Map<String, double> expensesByCategory = {};
   List<Goal> goals = [];
+  List<Transaction> recentTransactions = [];
 
   @override
   void initState() {
@@ -33,12 +36,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final expenses = await _transactionDao.getTotalByType('expense');
     final categories = await _transactionDao.getExpensesByCategory();
     final goalsList = await _goalDao.getAllGoals();
+    final allTransactions = await _transactionDao.getAllTransactions();
+
+    // Pegar as 5 transações mais recentes
+    allTransactions.sort((a, b) => b.date.compareTo(a.date));
+    final recent = allTransactions.take(5).toList();
 
     setState(() {
       totalIncome = income;
       totalExpenses = expenses;
       expensesByCategory = categories;
       goals = goalsList;
+      recentTransactions = recent;
     });
   }
 
@@ -55,12 +64,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
           'Dashboard',
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.pink),
-            onPressed: _loadData,
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -71,7 +74,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
             const SizedBox(height: 20),
             _buildChartsCarousel(),
             const SizedBox(height: 20),
-            _buildQuickActions(),
+            _buildQuickActions(), // Movido para cima
+            const SizedBox(height: 20),
+            _buildTransactionHistory(), // Agora fica abaixo das flechas
           ],
         ),
       ),
@@ -99,7 +104,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            '${balance.toStringAsFixed(2)}',
+            'R\$ ${balance.toStringAsFixed(2)}',
             style: const TextStyle(
               color: Colors.black,
               fontSize: 32,
@@ -122,7 +127,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '${totalIncome.toStringAsFixed(2)}',
+                      'R\$ ${totalIncome.toStringAsFixed(2)}',
                       style: const TextStyle(
                         color: Colors.pink,
                         fontSize: 18,
@@ -145,7 +150,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '${totalExpenses.toStringAsFixed(2)}',
+                      'R\$ ${totalExpenses.toStringAsFixed(2)}',
                       style: const TextStyle(
                         color: Colors.grey,
                         fontSize: 18,
@@ -184,6 +189,258 @@ class _DashboardScreenState extends State<DashboardScreen> {
               _buildGoalsChart(),
             ],
           ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildQuickActions() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            _buildActionButton(
+              Icons.arrow_back,
+              () {},
+            ),
+            _buildActionButton(
+              Icons.arrow_forward,
+              () {},
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionButton(IconData icon, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 50,
+        height: 50,
+        decoration: BoxDecoration(
+          color: Colors.pink,
+          borderRadius: BorderRadius.circular(25),
+        ),
+        child: Icon(
+          icon,
+          color: Colors.white,
+          size: 24,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTransactionHistory() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Transações Recentes',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const TransactionsScreen(),
+                  ),
+                );
+              },
+              child: const Text(
+                'Ver todas',
+                style: TextStyle(
+                  color: Colors.pink,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.1),
+                spreadRadius: 1,
+                blurRadius: 10,
+              ),
+            ],
+          ),
+          child: recentTransactions.isEmpty
+              ? Container(
+                  padding: const EdgeInsets.all(40),
+                  child: const Column(
+                    children: [
+                      Icon(
+                        Icons.receipt_long,
+                        size: 60,
+                        color: Colors.grey,
+                      ),
+                      SizedBox(height: 16),
+                      Text(
+                        'Nenhuma transação encontrada',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              : Column(
+                  children: [
+                    // Cabeçalho da tabela
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 16,
+                        horizontal: 20,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.pink.shade50,
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(16),
+                          topRight: Radius.circular(16),
+                        ),
+                      ),
+                      child: const Row(
+                        children: [
+                          Expanded(
+                            flex: 3,
+                            child: Text(
+                              'Descrição',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.pink,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 2,
+                            child: Text(
+                              'Valor',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.pink,
+                                fontSize: 14,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                          Expanded(
+                            flex: 2,
+                            child: Text(
+                              'Data',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.pink,
+                                fontSize: 14,
+                              ),
+                              textAlign: TextAlign.right,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Lista de transações
+                    ...recentTransactions.asMap().entries.map((entry) {
+                      final index = entry.key;
+                      final transaction = entry.value;
+                      final isLast = index == recentTransactions.length - 1;
+
+                      return Container(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 16,
+                          horizontal: 20,
+                        ),
+                        decoration: BoxDecoration(
+                          border: isLast
+                              ? null
+                              : Border(
+                                  bottom: BorderSide(
+                                    color: Colors.grey.shade200,
+                                    width: 1,
+                                  ),
+                                ),
+                          borderRadius: isLast
+                              ? const BorderRadius.only(
+                                  bottomLeft: Radius.circular(16),
+                                  bottomRight: Radius.circular(16),
+                                )
+                              : null,
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              flex: 3,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    transaction.description,
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    transaction.category,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey.shade600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Expanded(
+                              flex: 2,
+                              child: Text(
+                                '${transaction.type == 'income' ? '+' : '-'} R\$ ${transaction.amount.toStringAsFixed(2)}',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: transaction.type == 'income'
+                                      ? Colors.green
+                                      : Colors.red,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            Expanded(
+                              flex: 2,
+                              child: Text(
+                                '${transaction.date.day.toString().padLeft(2, '0')}/${transaction.date.month.toString().padLeft(2, '0')}/${transaction.date.year}',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                textAlign: TextAlign.right,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ],
+                ),
         ),
       ],
     );
@@ -350,46 +607,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildQuickActions() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _buildActionButton(
-              Icons.arrow_back,
-              () {},
-            ),
-            _buildActionButton(
-              Icons.arrow_forward,
-              () {},
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildActionButton(IconData icon, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 50,
-        height: 50,
-        decoration: BoxDecoration(
-          color: Colors.pink,
-          borderRadius: BorderRadius.circular(25),
-        ),
-        child: Icon(
-          icon,
-          color: Colors.white,
-          size: 24,
-        ),
       ),
     );
   }
