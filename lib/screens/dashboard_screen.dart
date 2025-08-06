@@ -450,7 +450,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.pink.shade50,
+        color: const Color.fromARGB(255, 249, 221, 230),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(

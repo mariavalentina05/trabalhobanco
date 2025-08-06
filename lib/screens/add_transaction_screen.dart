@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../models/transaction.dart';
 import '../dao/transaction_dao.dart';
 
@@ -80,10 +81,17 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   _buildTextField(
                       'Nome', _descriptionController, 'Digite o nome'),
                   const SizedBox(height: 12),
-                  _buildTextField('R\$ Valor', _amountController, 'R\$ 0,00',
-                      isNumber: true),
+                  _buildTextField(
+                    'R\$ Valor',
+                    _amountController,
+                    'R\$ 0,00',
+                    isNumber: true,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+                    ],
+                  ),
                   const SizedBox(height: 12),
-                  _buildDropdownField('Fonte', categories),
+                  _buildDropdownField('Data', categories),
                   const SizedBox(height: 20),
                   SizedBox(
                     width: double.infinity,
@@ -262,8 +270,12 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   }
 
   Widget _buildTextField(
-      String label, TextEditingController controller, String hint,
-      {bool isNumber = false}) {
+    String label,
+    TextEditingController controller,
+    String hint, {
+    bool isNumber = false,
+    List<TextInputFormatter>? inputFormatters,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -279,6 +291,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         TextFormField(
           controller: controller,
           keyboardType: isNumber ? TextInputType.number : TextInputType.text,
+          inputFormatters: inputFormatters,
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: TextStyle(color: Colors.grey.shade400),
