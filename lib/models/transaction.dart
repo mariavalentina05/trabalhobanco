@@ -2,7 +2,7 @@ class Transaction {
   final int? id;
   final String description;
   final double amount;
-  final String type; 
+  final String type;
   final String category;
   final DateTime date;
 
