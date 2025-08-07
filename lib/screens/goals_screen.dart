@@ -78,11 +78,64 @@ class _GoalsScreenState extends State<GoalsScreen> {
     _loadGoals();
   }
 
-  @override
-  void dispose() {
-    _nomeController.dispose();
-    _valorController.dispose();
-    super.dispose();
+  Future<void> _adicionarValor(Goal goal) async {
+    final controller = TextEditingController();
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Adicionar valor à meta'),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.numberWithOptions(decimal: true),
+          decoration: const InputDecoration(
+            hintText: 'Digite o valor a adicionar',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () async {
+              final valor = double.tryParse(controller.text) ?? 0.0;
+              if (valor > 0) {
+                double novoValor = goal.currentAmount + valor;
+                if (novoValor > goal.targetAmount) {
+                  showDialog(
+                    context: context,
+                    builder: (_) => AlertDialog(
+                      title: const Text('Valor excede a meta'),
+                      content: const Text('O valor informado ultrapassa o valor da meta.'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('OK'),
+                        ),
+                      ],
+                    ),
+                  );
+                  return;
+                }
+                final concluida = novoValor >= goal.targetAmount;
+                final atualizado = Goal(
+                  id: goal.id,
+                  title: goal.title,
+                  targetAmount: goal.targetAmount,
+                  currentAmount: novoValor,
+                  deadline: goal.deadline,
+                  isCompleted: concluida,
+                );
+                await _goalDao.updateGoal(atualizado);
+                Navigator.pop(context);
+                _loadGoals();
+              }
+            },
+            child: const Text('Adicionar'),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildBottomNavBar() {
@@ -92,18 +145,9 @@ class _GoalsScreenState extends State<GoalsScreen> {
       unselectedItemColor: Colors.grey,
       currentIndex: 2,
       items: const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.list),
-          label: 'Registros',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home),
-          label: 'Home',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.flag),
-          label: 'Metas',
-        ),
+        BottomNavigationBarItem(icon: Icon(Icons.list), label: 'Registros'),
+        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+        BottomNavigationBarItem(icon: Icon(Icons.flag), label: 'Metas'),
       ],
       onTap: (index) {
         switch (index) {
@@ -118,8 +162,6 @@ class _GoalsScreenState extends State<GoalsScreen> {
               context,
               MaterialPageRoute(builder: (context) => const DashboardScreen()),
             );
-            break;
-          case 2:
             break;
         }
       },
@@ -231,6 +273,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
                 itemCount: goals.length,
                 itemBuilder: (context, index) {
                   final goal = goals[index];
+                  final progress = (goal.currentAmount / goal.targetAmount).clamp(0.0, 1.0);
                   return Dismissible(
                     key: Key(goal.id.toString()),
                     direction: DismissDirection.endToStart,
@@ -251,51 +294,54 @@ class _GoalsScreenState extends State<GoalsScreen> {
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: Colors.grey.shade200),
                       ),
-                      child: Row(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(
-                            flex: 2,
-                            child: Text(
-                              goal.title,
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: Text(
-                              'R\$ ${goal.targetAmount.toStringAsFixed(2)}',
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: Colors.black87,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () => _alternarConclusao(goal),
-                            child: Container(
-                              width: 24,
-                              height: 24,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: goal.isCompleted
-                                    ? const Color(0xFFE91E63)
-                                    : Colors.transparent,
-                                border: Border.all(
-                                  color: const Color(0xFFE91E63),
-                                  width: 2,
+                          Row(
+                            children: [
+                              Expanded(
+                                flex: 2,
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      goal.title,
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    if (goal.isCompleted)
+                                      const Icon(Icons.check_circle, color: Colors.green, size: 18),
+                                  ],
                                 ),
                               ),
-                              child: Icon(
-                                Icons.check,
-                                size: 14,
-                                color: goal.isCompleted
-                                    ? Colors.white
-                                    : const Color(0xFFE91E63),
+                              IconButton(
+                                icon: const Icon(Icons.attach_money),
+                                onPressed: () => _adicionarValor(goal),
                               ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          LinearProgressIndicator(
+                            value: progress,
+                            backgroundColor: Colors.grey[300],
+                            valueColor: const AlwaysStoppedAnimation<Color>(
+                              Color(0xFFE91E63),
                             ),
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'R\$ ${goal.currentAmount.toStringAsFixed(2)} de R\$ ${goal.targetAmount.toStringAsFixed(2)}',
+                                style: const TextStyle(fontSize: 12),
+                              ),
+                              Text(
+                                '${(progress * 100).toStringAsFixed(0)}%',
+                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                              ),
+                            ],
                           ),
                         ],
                       ),
