@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:intl/intl.dart';
 import '/dao/transaction_dao.dart';
 import '/dao/goal_dao.dart';
 import '/models/goal.dart';
@@ -7,6 +8,8 @@ import '/models/transaction.dart';
 import 'menu_screen.dart';
 import 'goals_screen.dart';
 import 'transactions_screen.dart';
+
+final NumberFormat realFormat = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -100,7 +103,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           const Text('Saldo atual', style: TextStyle(color: Colors.black54, fontSize: 16)),
           const SizedBox(height: 8),
           Text(
-            'R\$ ${balance.toStringAsFixed(2)}',
+            realFormat.format(balance),
             style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
@@ -111,7 +114,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   children: [
                     const Text('Recebidos', style: TextStyle(color: Colors.pink, fontSize: 14, fontWeight: FontWeight.w600)),
                     const SizedBox(height: 4),
-                    Text('R\$ ${totalIncome.toStringAsFixed(2)}', style: const TextStyle(color: Colors.pink, fontSize: 18, fontWeight: FontWeight.bold)),
+                    Text(realFormat.format(totalIncome), style: const TextStyle(color: Colors.pink, fontSize: 18, fontWeight: FontWeight.bold)),
                   ],
                 ),
               ),
@@ -120,7 +123,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   children: [
                     const Text('Gastos', style: TextStyle(color: Colors.grey, fontSize: 14, fontWeight: FontWeight.w600)),
                     const SizedBox(height: 4),
-                    Text('R\$ ${totalExpenses.toStringAsFixed(2)}', style: const TextStyle(color: Colors.grey, fontSize: 18, fontWeight: FontWeight.bold)),
+                    Text(realFormat.format(totalExpenses), style: const TextStyle(color: Colors.grey, fontSize: 18, fontWeight: FontWeight.bold)),
                   ],
                 ),
               ),
@@ -280,7 +283,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             Expanded(
                               flex: 2,
                               child: Text(
-                                '${transaction.type == 'income' ? '+' : '-'} R\$ ${transaction.amount.toStringAsFixed(2)}',
+                                '${transaction.type == 'income' ? '+' : '-'} ${realFormat.format(transaction.amount)}',
                                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: transaction.type == 'income' ? Colors.green : Colors.red),
                                 textAlign: TextAlign.center,
                               ),
@@ -493,7 +496,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              '${(goal.progress * 100).toStringAsFixed(1)}% - R\$ ${goal.currentAmount.toStringAsFixed(2)} / R\$ ${goal.targetAmount.toStringAsFixed(2)}',
+                              '${(goal.progress * 100).toStringAsFixed(1)}% - ${realFormat.format(goal.currentAmount)} / ${realFormat.format(goal.targetAmount)}',
                               style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                             ),
                           ],
