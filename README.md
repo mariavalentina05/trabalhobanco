@@ -127,9 +127,3 @@ void _saveTransaction() async {
 Desenvolvido por Maria Valentina, Maria Marques e Camilla Pecinatto
 
 ```
-
----
-
-Se quiser, já posso **gerar esse README estilizado como PDF** também, com formatação preservada, para você ter a versão offline.  
-Quer que eu já gere o PDF dessa versão estilizada?
-```
