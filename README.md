@@ -1,6 +1,5 @@
 
 
-````markdown
 # 💰 PIG Bank App
 
 Um aplicativo **Flutter** para **gerenciamento de finanças pessoais**, permitindo que o usuário registre transações, defina metas financeiras e acompanhe o progresso através de um **painel intuitivo**.
