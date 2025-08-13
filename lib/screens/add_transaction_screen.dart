@@ -91,7 +91,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                     ],
                   ),
                   const SizedBox(height: 12),
-                  _buildDropdownField('Data', categories),
+                  _buildDropdownField('Fonte', categories),
                   const SizedBox(height: 20),
                   SizedBox(
                     width: double.infinity,

@@ -82,6 +82,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
             _buildQuickActions(),
             const SizedBox(height: 20),
             _buildTransactionHistory(),
+            const SizedBox(height: 20),
+            _buildExpenseHistory(),
           ],
         ),
       ),
@@ -533,6 +535,56 @@ class _DashboardScreenState extends State<DashboardScreen> {
             break;
         }
       },
+    );
+  }
+
+  // Supondo que você tenha uma lista chamada expenses
+  Widget buildExpenseHistoryTable(List<Transaction> expenses, {bool darkMode = false}) {
+    if (expenses.isEmpty) {
+      return const Center(child: Text('Nenhum gasto registrado.'));
+    }
+    final currencyFormatter = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: expenses.length,
+      itemBuilder: (context, i) {
+        final e = expenses[expenses.length - 1 - i];
+        return Card(
+          color: darkMode
+              ? const Color.fromARGB(255, 31, 31, 31)
+              : const Color.fromARGB(247, 246, 244, 255),
+          child: ListTile(
+            leading: Icon(
+              Icons.money,
+              color: darkMode ? Colors.white : Colors.black,
+            ),
+            title: Text(
+              currencyFormatter.format(e.amount),
+              style: TextStyle(
+                color: darkMode ? Colors.white : Colors.black,
+              ),
+            ),
+            subtitle: Text(
+              '${e.date.day}/${e.date.month}/${e.date.year}',
+              style: TextStyle(
+                color: darkMode ? Colors.white : Colors.black,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildExpenseHistory() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Histórico de Gastos', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 16),
+        buildExpenseHistoryTable(recentTransactions),
+      ],
     );
   }
 }
