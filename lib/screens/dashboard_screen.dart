@@ -83,7 +83,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             const SizedBox(height: 20),
             _buildTransactionHistory(),
             const SizedBox(height: 20),
-            _buildExpenseHistory(),
+            
           ],
         ),
       ),
@@ -577,14 +577,5 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildExpenseHistory() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text('Histórico de Gastos', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 16),
-        buildExpenseHistoryTable(recentTransactions),
-      ],
-    );
-  }
+
 }
