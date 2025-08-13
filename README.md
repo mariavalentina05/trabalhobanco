@@ -1,6 +1,5 @@
 
 
-````markdown
 # 💰 PIG Bank App
 
 Um aplicativo **Flutter** para **gerenciamento de finanças pessoais**, permitindo que o usuário registre transações, defina metas financeiras e acompanhe o progresso através de um **painel intuitivo**.
@@ -111,7 +110,7 @@ void _saveTransaction() async {
 
 ## 📸 Fluxo de Telas
 
-1. **Boas-vindas**
+1. **Bem-vindo**
 2. **Dashboard**
 3. **Adicionar Transação** / **Metas** / **Lista**
 4. **Menu Lateral**
