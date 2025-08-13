@@ -110,7 +110,7 @@ void _saveTransaction() async {
 
 ## 📸 Fluxo de Telas
 
-1. **Boas-vindas**
+1. **Bem-vindo**
 2. **Dashboard**
 3. **Adicionar Transação** / **Metas** / **Lista**
 4. **Menu Lateral**
